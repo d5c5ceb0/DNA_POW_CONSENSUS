@@ -715,6 +715,10 @@ func (node *node) SetSyncFailed() {
 	node.syncFlag = node.syncFlag | 0x02
 }
 
+func (node *node) NeedSync() bool {
+	return node.needSync()
+}
+
 func (node *node) needSync() bool {
 	heights, _ := node.GetNeighborHeights()
 	log.Info("nbr heigh-->", heights, ledger.DefaultLedger.Blockchain.BlockHeight)

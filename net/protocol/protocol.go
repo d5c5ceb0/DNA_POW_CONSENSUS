@@ -169,6 +169,7 @@ type Noder interface {
 	IsSyncFailed() bool
 	SetSyncFailed()
 	StartSync()
+	NeedSync() bool
 	CacheInvHash(hash common.Uint256)
 	ExistInvHash(hash common.Uint256) bool
 	DeleteInvHash(hash common.Uint256)

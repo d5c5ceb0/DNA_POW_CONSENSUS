@@ -19,6 +19,7 @@ import (
 	tx "DNA_POW/core/transaction"
 	"DNA_POW/core/transaction/payload"
 	"DNA_POW/crypto"
+	. "DNA_POW/errors"
 	"DNA_POW/events"
 	//	"DNA_POW/net"
 )
@@ -201,6 +202,12 @@ func (pow *PowService) GenerateBlock(addr string) (*ledger.Block, error) {
 		if !ledger.IsFinalizedTransaction(tx, nextBlockHeight) {
 			continue
 		}
+
+		if errCode := ledger.CheckTransactionContext(tx, ledger.DefaultLedger); errCode != ErrNoError {
+			log.Info("generate block, wrong tx", tx.Hash())
+			continue
+		}
+
 		fee := tx.GetFee(ledger.DefaultLedger.Blockchain.AssetID)
 		if fee != int64(tx.Fee) {
 			continue
@@ -250,6 +257,11 @@ func (pow *PowService) DiscreteMining(n uint32) ([]*Uint256, error) {
 
 	for {
 		log.Trace("<================Discrete Mining==============>\n")
+		if pow.localNet.NeedSync() {
+			log.Trace("generage block, need sync")
+			time.Sleep(time.Second * 2)
+			continue
+		}
 
 		msgBlock, err := pow.GenerateBlock(pow.PayToAddr)
 		if err != nil {
@@ -424,6 +436,11 @@ out:
 		}
 		log.Trace("<================POW Mining==============>\n")
 		//time.Sleep(15 * time.Second)
+		if pow.localNet.NeedSync() {
+			log.Trace("generage block, need sync")
+			time.Sleep(time.Second * 2)
+			continue
+		}
 
 		msgBlock, err := pow.GenerateBlock(pow.PayToAddr)
 		if err != nil {
